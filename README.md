@@ -8,6 +8,9 @@ Shoutout to Github's Documentation for being really thorough and super useful.
 ## Spinning Up
 You'll need to be running Node 4.0+!
 
+You'll also need to be running RethinkDB. I'd love to throw this into a Docker
+container another day.
+
 ```
 npm install
 npm start

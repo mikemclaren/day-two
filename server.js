@@ -60,10 +60,15 @@ app.post('/', xHubSignatureChecksOut, async (ctx, next) => {
   const eventType = ctx.request.headers['X-Github-Event'];
 
   if(supportedEvents.hasOwnProperty(eventType)) {
-    await supportedEvents[eventType]();
-  } else {
+    await supportedEvents[eventType](body);
     ctx.body = {
-      message: 'Unsupported, but this was expected!'
+      message: 'Done! good stuff.'
+    };
+    ctx.status = 200;
+  } else {
+    await supportedEvents.default(body, eventType);
+    ctx.body = {
+      message: 'Unsupported, but this was expected! Default action taken.'
     };
     ctx.status = 200;
   }
