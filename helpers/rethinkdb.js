@@ -10,7 +10,7 @@ async function setUpIfNecessary() {
     await r.dbCreate('githubwebhooks').run(connection);
     console.log('Created githubwebhooks DB.');
   } catch(ex) {
-    console.log('githubwebhooks DB already crea')
+    console.log('githubwebhooks DB already created');
   }
 }
 

@@ -9,6 +9,7 @@ import Router from 'koa-router';
 
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 
 import xHubSignatureChecksOut from './middleware/xHubSignatureChecksOut';
 
@@ -32,7 +33,7 @@ const router = new Router();
 
 app.use(bodyParser());
 
-app.use(async (ctx: Object, next: function) : Promise => {
+app.use(async (ctx: Object, next) : Promise => {
   try {
     await next();
   } catch(err) {
@@ -48,7 +49,7 @@ app.use(async (ctx: Object, next: function) : Promise => {
   return;
 });
 
-app.get('/', async (ctx, next) => {
+router.get('/', async (ctx, next) => {
   ctx.body = {
     message: 'Welcome! This is day-two, a Github Webhook server.'
   };
@@ -56,9 +57,9 @@ app.get('/', async (ctx, next) => {
   await next();
 });
 
-app.post('/', xHubSignatureChecksOut, async (ctx, next) => {
+router.post('/', xHubSignatureChecksOut, async (ctx, next) => {
   const body = ctx.request.body;
-  const eventType = ctx.request.headers['X-Github-Event'];
+  const eventType = ctx.request.headers['x-github-event'];
 
   if(supportedEvents.hasOwnProperty(eventType)) {
     await supportedEvents[eventType](body);
@@ -68,12 +69,32 @@ app.post('/', xHubSignatureChecksOut, async (ctx, next) => {
     ctx.status = 200;
   } else {
     await supportedEvents.default(body, eventType);
+
     ctx.body = {
       message: 'Unsupported, but this was expected! Default action taken.'
     };
     ctx.status = 200;
   }
+
+  await next();
+  return;
 });
+
+if(process.env.NODE_ENV === 'local') {
+  router.get('/tests', async (ctx, next) => {
+    const testBody = {
+      action: 'test',
+      message: 'This happened. It was a test.'
+    };
+
+    let generatedHmac = crypto.createHmac('sha1', process.env.GITHUB_SECRET);
+    generatedHmac = generatedHmac.update(new Buffer(JSON.stringify(testBody), 'utf8'));
+    generatedHmac = generatedHmac.digest('hex');
+
+    ctx.body = `curl -X POST -H 'Content-Type: application/json' -H 'X-Hub-Signature: sha1=${generatedHmac}' -H 'X-Github-Event: test' -d '${JSON.stringify(testBody)}' http://127.0.0.1:3101/`;
+    ctx.status = 200;
+  });
+}
 
 app.use(router.routes());
 
