@@ -1,5 +1,6 @@
 // @flow
 require('babel-polyfill');
+require('dotenv').config();
 
 import Koa from 'koa';
 import bodyParser from 'koa-bodyparser';

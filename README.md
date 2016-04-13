@@ -11,6 +11,13 @@ You'll need to be running Node 4.0+!
 You'll also need to be running RethinkDB. I'd love to throw this into a Docker
 container another day.
 
+You'll want to create a `.env` file that contains the following variables:
+
+```
+GITHUB_SECRET=your_github_webhook_secret
+```
+
+Then you can get going!
 ```
 npm install
 npm start

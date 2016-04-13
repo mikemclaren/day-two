@@ -3,7 +3,7 @@ import crypto from 'crypto';
 
 const xHubSignatureChecksOut = async (ctx: Object, next: function) : Promise => {
   if(ctx.request.headers['X-Hub-Signature']) {
-    let generatedHmac = crypto.createHmac('sha1', 'process.env.GITHUB_SECRET');
+    let generatedHmac = crypto.createHmac('sha1', process.env.GITHUB_SECRET);
     generatedHmac.update(new Buffer(JSON.stringify(ctx.request.body), 'utf8'));
     generatedHmac.digest('hex');
 
